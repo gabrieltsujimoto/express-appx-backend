@@ -1,7 +1,24 @@
-const express = require('express')
+const express = require('express');
 const app = express();
-
+const bodyParser = require('body-parser');
 const saudacao = require('./greetingsMid')
+
+const userAPI = require('./api/user');
+
+require('./api/produto')(app, 'com Param!')
+
+//Middleware em módulos criados, forma padrão
+app.post('/usuario', userAPI.save);
+app.get('/usuario', userAPI.getUser);
+
+/*  Tratamento do body das requisições utilizando a biblioteca body-parser
+    cada um deles é responsável por tratar os dados de acordo com o formato textual
+    pode ser em texto, JSON e até URLEnconded (quando os dados da requisição vão direto pelo header da mesma. )
+
+*/
+app.use(bodyParser.text())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended: true}))
 
 app.listen(3000, () => console.log(`
     -----------------------------
@@ -19,9 +36,29 @@ app.use((req, res, next) => {
     next()
 })
 
-app.get('/cliente/:id', (req, res) => {
-    res.send(`Cliente ${} selecionado!`)
+//parametros via query
+app.get('/clientes/relatorio', (req,res) =>{
+    res.send(`Cliente relatório: comepleto ${req.query.completo} ano = ${req.query.ano}`)
 })
+
+app.post('/body', (req,res)=>{
+    // let body = ''
+    // req.on('data', function(parte){
+    //     body += parte
+    // })
+
+    // req.on('end', function(){
+    //     res.send(body);
+    // })
+
+    res.send(req.body)
+})
+
+//parametros dentro da URl
+app.get('/clientes/:id', (req, res) => {
+    res.send(`Cliente de id: ${req.params.id}`)
+})
+
 
 // Metódos são use, all (pra todos os verbos do http) e get/put/etc para especificos
 app.get('/home', (req, res) => {
